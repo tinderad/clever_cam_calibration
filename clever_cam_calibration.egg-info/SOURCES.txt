@@ -1,7 +1,0 @@
-setup.py
-clever_cam_calibration.egg-info/PKG-INFO
-clever_cam_calibration.egg-info/SOURCES.txt
-clever_cam_calibration.egg-info/dependency_links.txt
-clever_cam_calibration.egg-info/top_level.txt
-clevercamcalib/__init__.py
-clevercamcalib/clevercamcalib.py
