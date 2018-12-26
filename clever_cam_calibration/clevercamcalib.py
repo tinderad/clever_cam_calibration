@@ -2,6 +2,7 @@ import numpy as np
 import cv2
 import glob
 import yaml
+import urllib
 
 def set_camera_info(chessboard_size, square_size, images_topic, destination):
     if chessboard_size is not None:
@@ -91,7 +92,10 @@ def calibrate(chessboard_size, square_size):
         command = raw_input()
         if command == "catch" or command == "":
             print("---")
-            return_value, image = camera.read()
+            #image = camera.read()
+            req = urllib.request.urlopen('http://192.168.11.1:8080/snapshot?topic=/main_camera/image_raw')
+            arr = np.asarray(bytearray(req.read()), dtype=np.uint8)
+            image = cv2.imdecode(arr, -1)
             gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
             ret, corners = cv2.findChessboardCorners(gray, (length, width), None)
             if ret:
