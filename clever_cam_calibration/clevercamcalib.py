@@ -88,7 +88,7 @@ def calibrate(chessboard_size, square_size):
     print("Commands:")
     print("help catch delete restart stop finish")
     while True:
-        command = input()
+        command = raw_input()
         if len(command.split()) == 1:
             if command == "help":
                 print("Take pictures of a chessboard from different racourses by using command 'catch'.")
