@@ -86,37 +86,34 @@ def calibrate(chessboard_size, square_size):
     gray_old = None
     print("For help see ...")
     print("Commands:")
-    print("help catch delete restart stop finish")
+    print("help, catch (key: Enter), delete, restart, stop, finish")
     while True:
         command = raw_input()
-        if len(command.split()) == 1:
+        if command == "catch" or command == "":
+            print("---")
+            return_value, image = camera.read()
+            gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+            ret, corners = cv2.findChessboardCorners(gray, (length, width), None)
+            if ret:
+                objpoints.append(objp)
+                corners2 = cv2.cornerSubPix(gray, corners, (11, 11), (-1, -1), criteria)
+                imgpoints.append(corners2)
+                gray_old = gray
+                print("Image added, now " + str(len(objpoints)))
+            else:
+                print("Chessboard not found, now " + str(len(objpoints)))
+        elif len(command.split()) == 1:
             if command == "help":
                 print("Take pictures of a chessboard from different racourses by using command 'catch'.")
                 print("You should take at least 10 pictures to finish calibration (having more gives you better accuracy).")
                 print("Finish calibration by using command 'finish'.")
                 print("Corrected coefficients will be stored in present directory as 'camera_info.yaml'")
-            elif command == "catch" or command == "c":
-                return_value, image = camera.read()
-                gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-                ret, corners = cv2.findChessboardCorners(gray, (length, width), None)
-                print("svd")
-                if ret:
-                    objpoints.append(objp)
-                    corners2 = cv2.cornerSubPix(gray, corners, (11, 11), (-1, -1), criteria)
-                    imgpoints.append(corners2)
-                    gray_old = gray
-                    print("Image added, now " + str(len(objpoints)))
-                else:
-                    print("Chessboard not found")
             elif command == "delete":
-                objpoints = objpoints[:-1]
-                imgpoints = imgpoints[:-1]
-                print("Deleted previous")
-            elif command == "restart":
-                print("Restarting")
-                camera.release()
-                calibrate(chessboard_size, square_size)
-                break
+                if len(objpoints)>0:
+                    objpoints = objpoints[:-1]
+                    imgpoints = imgpoints[:-1]
+                    print("Deleted previous")
+                else: print("Nothing to delete")
             elif command == "stop":
                 print("Stopped")
                 break
@@ -124,8 +121,6 @@ def calibrate(chessboard_size, square_size):
                 if len(objpoints) >= 10:
                     ret, mtx, dist, rvecs, tvecs = cv2.calibrateCamera(objpoints, imgpoints, gray_old.shape[::-1], None,
                                                                        None)
-                    np.savetxt("matrix.txt", (mtx[0][0], mtx[0][2], mtx[1][1], mtx[1][2], mtx[2][2]), fmt='%s')
-                    np.savetxt("distortion.txt", dist, fmt='%s')
                     file = open("\camera_info.yaml", "w")
                     file.write(
                         yaml.dump({"ret": ret, "matrix": mtx, "distortion": dist, "rvecs": rvecs, "tvecs": tvecs}))
@@ -133,7 +128,11 @@ def calibrate(chessboard_size, square_size):
                     quit()
                 else:
                     print("Not enough images, now "+str(len(objpoints))+" (10 required)")
-            else: print("unknown command")
+            elif command == "restart":
+                print("chessboard size: "+str(chessboard_size)+" "+"square size: "+str(square_size))
+                camera.release()
+                calibrate(chessboard_size, square_size)
+                break
         elif len(command.split()) == 2 and command.split()[0] == "help":
             command = command.split()[1]
             if command == "catch":
@@ -167,5 +166,5 @@ def calibrate(chessboard_size, square_size):
             calibrate(new_size, new_sq_size)
             break
         else:
-            print("unknown command")
+            print("Unknown command")
     camera.release()
