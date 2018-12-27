@@ -2,7 +2,6 @@ import numpy as np
 import cv2
 import glob
 import yaml
-import urllib.request
 from cv_bridge import CvBridge
 from sensor_msgs.msg import Image
 import rospy
