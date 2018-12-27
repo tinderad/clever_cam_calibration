@@ -74,6 +74,7 @@ def calibrate(chessboard_size, square_size, __restarted = False):
         camera = cv2.VideoCapture(0)
         bridge = CvBridge()
         image_sub = rospy.Subscriber('main_camera/image_raw', Image, image_callback, queue_size=1)
+        print(image_sub)
     if chessboard_size is not None:
         size = list(map(int, chessboard_size.split("x")))
         if len(size) == 2:
