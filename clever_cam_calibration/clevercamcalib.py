@@ -71,7 +71,7 @@ def get_undistorted_image(image, camera_info):
 def calibrate(chessboard_size, square_size, __restarted = False):
     if not __restarted:
         print("Calibration started!")
-        camera = cv2.VideoCapture(0)
+        #camera = cv2.VideoCapture(0)
         bridge = CvBridge()
         image_sub = rospy.Subscriber('main_camera/image_raw', Image, image_callback, queue_size=1)
         print(image_sub)
@@ -106,7 +106,7 @@ def calibrate(chessboard_size, square_size, __restarted = False):
             #req = urllib.request.urlopen('http://192.168.11.1:8080/snapshot?topic=/main_camera/image_raw')
             #arr = np.asarray(bytearray(req.read()), dtype=np.uint8)
             #image = cv2.imdecode(arr, -1)
-            gray = cv2.cvtColor(image_sub, cv2.COLOR_BGR2GRAY)
+            gray = cv2.cvtColor(bridge.imgmsg_to_cv2(image_sub, desired_encoding="bgr8"), cv2.COLOR_BGR2GRAY)
             ret, corners = cv2.findChessboardCorners(gray, (length, width), None)
             if ret:
                 objpoints.append(objp)
