@@ -106,8 +106,7 @@ def calibrate(chessboard_size, square_size, __restarted = False):
             #req = urllib.request.urlopen('http://192.168.11.1:8080/snapshot?topic=/main_camera/image_raw')
             #arr = np.asarray(bytearray(req.read()), dtype=np.uint8)
             #image = cv2.imdecode(arr, -1)
-            gray = cv2.cvtColor(bridge.imgmsg_to_cv2(image_sub, desired_encoding="bgr8"), cv2.COLOR_BGR2GRAY)
-            ret, corners = cv2.findChessboardCorners(gray, (length, width), None)
+            ret, corners = cv2.findChessboardCorners(image_sub, (length, width), None)
             if ret:
                 objpoints.append(objp)
                 corners2 = cv2.cornerSubPix(gray, corners, (11, 11), (-1, -1), criteria)
