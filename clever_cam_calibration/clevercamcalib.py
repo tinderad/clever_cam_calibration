@@ -3,6 +3,13 @@ import cv2
 import glob
 import yaml
 import urllib.request
+from cv_bridge import CvBridge
+from sensor_msgs.msg import Image
+import rospy
+
+def image_callback(data):
+    cv_image = bridge.imgmsg_to_cv2(data, 'bgr8')  # OpenCV image
+    gray = cv2.cvtColor(cv_image, cv2.COLOR_BGR2GRAY, dstCn=0)
 
 def set_camera_info(chessboard_size, square_size, images_topic, destination):
     if chessboard_size is not None:
@@ -62,9 +69,12 @@ def get_undistorted_image(image, camera_info):
     return dst
 
 
-def calibrate(chessboard_size, square_size):
-    camera = cv2.VideoCapture(0)
-    print("Calibration started!")
+def calibrate(chessboard_size, square_size, __restarted = False):
+    if not __restarted:
+        print("Calibration started!")
+        camera = cv2.VideoCapture(0)
+        bridge = CvBridge()
+        image_sub = rospy.Subscriber('main_camera/image_raw', Image, image_callback, queue_size=1)
     if chessboard_size is not None:
         size = list(map(int, chessboard_size.split("x")))
         if len(size) == 2:
@@ -89,14 +99,14 @@ def calibrate(chessboard_size, square_size):
     print("Commands:")
     print("help, catch (key: Enter), delete, restart, stop, finish")
     while True:
-        command = raw_input()
+        command = input()
         if command == "catch" or command == "":
             print("---")
-            #image = camera.read()
-            req = urllib.request.urlopen('http://192.168.11.1:8080/snapshot?topic=/main_camera/image_raw')
-            arr = np.asarray(bytearray(req.read()), dtype=np.uint8)
-            image = cv2.imdecode(arr, -1)
-            gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+            #return_value, image = camera.read()
+            #req = urllib.request.urlopen('http://192.168.11.1:8080/snapshot?topic=/main_camera/image_raw')
+            #arr = np.asarray(bytearray(req.read()), dtype=np.uint8)
+            #image = cv2.imdecode(arr, -1)
+            gray = cv2.cvtColor(image_sub, cv2.COLOR_BGR2GRAY)
             ret, corners = cv2.findChessboardCorners(gray, (length, width), None)
             if ret:
                 objpoints.append(objp)
@@ -135,7 +145,7 @@ def calibrate(chessboard_size, square_size):
             elif command == "restart":
                 print("chessboard size: "+str(chessboard_size)+" "+"square size: "+str(square_size))
                 camera.release()
-                calibrate(chessboard_size, square_size)
+                calibrate(chessboard_size, square_size, True)
                 break
         elif len(command.split()) == 2 and command.split()[0] == "help":
             command = command.split()[1]
