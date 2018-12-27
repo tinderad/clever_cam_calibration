@@ -2,7 +2,7 @@ import numpy as np
 import cv2
 import glob
 import yaml
-import urllib
+import urllib.request
 
 def set_camera_info(chessboard_size, square_size, images_topic, destination):
     if chessboard_size is not None:
