@@ -89,7 +89,7 @@ def calibrate(chessboard_size, square_size):
     print("Commands:")
     print("help, catch (key: Enter), delete, restart, stop, finish")
     while True:
-        command = raw_input()
+        command = input()
         if command == "catch" or command == "":
             print("---")
             #image = camera.read()
