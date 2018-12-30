@@ -50,13 +50,12 @@ def set_camera_info(chessboard_size, square_size, images_topic, destination):
 
 
 def get_undistorted_image(image, camera_info):
-    img = cv2.imread(image)
     file = yaml.load(open(camera_info))
     matrix = file['matrix']
     distortions = file['distortion']
-    h, w = img.shape[:2]
+    h, w = image.shape[:2]
     newcameramtx, roi = cv2.getOptimalNewCameraMatrix(matrix, distortions, (w, h), 1, (w, h))
-    dst = cv2.undistort(img, matrix, distortions, None, newcameramtx)
+    dst = cv2.undistort(image, matrix, distortions, None, newcameramtx)
     x, y, w, h = roi
     dst = dst[y:y + h, x:x + w]
     return dst
