@@ -4,6 +4,9 @@ import glob
 import yaml
 import urllib.request
 
+FISHEYE_CAM_320 = "fisheye_cam_320.yaml"
+FISHEYE_CAM_640 = "fisheye_cam_640.yaml"
+
 def set_camera_info(chessboard_size, square_size, images_topic, destination):
     if chessboard_size is not None:
         chessboard_size = list(map(int, chessboard_size.split("x")))
@@ -49,13 +52,16 @@ def set_camera_info(chessboard_size, square_size, images_topic, destination):
     file.write(yaml.dump({"ret": ret, "matrix": mtx, "distortion": dist, "rvecs": rvecs, "tvecs": tvecs}))
 
 
-def get_undistorted_image(image, camera_info):
+def get_undistorted_image(cv2_image, camera_info):
     file = yaml.load(open(camera_info))
-    matrix = file['matrix']
-    distortions = file['distortion']
-    h, w = image.shape[:2]
+    mtx = file['camera_matrix']["data"]
+    matrix = np.array([[mtx[0],mtx[1],mtx[2]], [mtx[3],mtx[4],mtx[5]], [mtx[6],mtx[7],mtx[8]]])
+    print(matrix)
+    distortions = np.array(file['distortion_coefficients']["data"])
+    print(distortions)
+    h, w = cv2_image.shape[:2]
     newcameramtx, roi = cv2.getOptimalNewCameraMatrix(matrix, distortions, (w, h), 1, (w, h))
-    dst = cv2.undistort(image, matrix, distortions, None, newcameramtx)
+    dst = cv2.undistort(cv2_image, matrix, distortions, None, newcameramtx)
     x, y, w, h = roi
     dst = dst[y:y + h, x:x + w]
     return dst
