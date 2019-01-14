@@ -7,6 +7,7 @@ import urllib.request
 FISHEYE_CAM_320 = "fisheye_cam_320.yaml"
 FISHEYE_CAM_640 = "fisheye_cam_640.yaml"
 
+
 def set_camera_info(chessboard_size, square_size, images_topic, destination):
     if chessboard_size is not None:
         chessboard_size = list(map(int, chessboard_size.split("x")))
@@ -55,7 +56,7 @@ def set_camera_info(chessboard_size, square_size, images_topic, destination):
 def get_undistorted_image(cv2_image, camera_info):
     file = yaml.load(open(camera_info))
     mtx = file['camera_matrix']["data"]
-    matrix = np.array([[mtx[0],mtx[1],mtx[2]], [mtx[3],mtx[4],mtx[5]], [mtx[6],mtx[7],mtx[8]]])
+    matrix = np.array([[mtx[0], mtx[1], mtx[2]], [mtx[3], mtx[4], mtx[5]], [mtx[6], mtx[7], mtx[8]]])
     print(matrix)
     distortions = np.array(file['distortion_coefficients']["data"])
     print(distortions)
@@ -67,11 +68,12 @@ def get_undistorted_image(cv2_image, camera_info):
     return dst
 
 
-def calibrate():
+def calibrate(chessboard_size, square_size):
     print("Calibration started!")
-    criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 30, 0.001)
-    objp = np.zeros((6 * 7, 3), np.float32)
-    objp[:, :2] = np.mgrid[0:7, 0:6].T.reshape(-1, 2)
+    length, width = chessboard_size
+    criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, square_size, 0.001)
+    objp = np.zeros((length * width, 3), np.float32)
+    objp[:, :2] = np.mgrid[0:width, 0:length].T.reshape(-1, 2)
     objpoints = []
     imgpoints = []
     gray_old = None
@@ -86,7 +88,7 @@ def calibrate():
             arr = np.asarray(bytearray(req.read()), dtype=np.uint8)
             image = cv2.imdecode(arr, -1)
             gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-            ret, corners = cv2.findChessboardCorners(gray, (7, 6), None)
+            ret, corners = cv2.findChessboardCorners(gray, (width, length), None)
             if ret:
                 objpoints.append(objp)
                 corners2 = cv2.cornerSubPix(gray, corners, (11, 11), (-1, -1), criteria)
@@ -98,29 +100,31 @@ def calibrate():
         elif len(command.split()) == 1:
             if command == "help":
                 print("Take pictures of a chessboard from different racourses by using command 'catch'.")
-                print("You should take at least 10 pictures to finish calibration (having more gives you better accuracy).")
+                print(
+                    "You should take at least 10 pictures to finish calibration (adding more gives you better accuracy).")
                 print("Finish calibration by using command 'finish'.")
                 print("Corrected coefficients will be stored in present directory as 'camera_info.yaml'")
             elif command == "delete":
-                if len(objpoints)>0:
+                if len(objpoints) > 0:
                     objpoints = objpoints[:-1]
                     imgpoints = imgpoints[:-1]
                     print("Deleted previous")
-                else: print("Nothing to delete")
+                else:
+                    print("Nothing to delete")
             elif command == "stop":
                 print("Stopped")
                 break
             elif command == "finish":
                 if len(objpoints) >= 10:
                     ret, mtx, dist, rvecs, tvecs = cv2.calibrateCamera(objpoints, imgpoints, gray_old.shape[::-1], None,
-                                                                       None)
+                                                                       None, None, None, cv2.CV_CALIB_RATIONAL_MODEL)
                     file = open("\camera_info.yaml", "w")
                     file.write(
                         yaml.dump({"ret": ret, "matrix": mtx, "distortion": dist, "rvecs": rvecs, "tvecs": tvecs}))
                     print("Calibration successful")
                     quit()
                 else:
-                    print("Not enough images, now "+str(len(objpoints))+" (10 required)")
+                    print("Not enough images, now " + str(len(objpoints)) + " (10 required)")
             elif command == "restart":
                 calibrate()
                 break
@@ -139,7 +143,8 @@ def calibrate():
                 print("Stops calibration (all data will be deleted)")
             elif command == "finish":
                 print("Ends calibration:")
-                print("If there are 10 photos or more, calibration coefficients will be saved in present directory as 'camera_info.yaml' ")
+                print(
+                    "If there are 10 photos or more, calibration coefficients will be saved in present directory as 'camera_info.yaml' ")
             else:
                 print("unknown command")
         else:
