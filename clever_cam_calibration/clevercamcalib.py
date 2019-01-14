@@ -117,7 +117,7 @@ def calibrate(chessboard_size, square_size):
             elif command == "finish":
                 if len(objpoints) >= 10:
                     ret, mtx, dist, rvecs, tvecs = cv2.calibrateCamera(objpoints, imgpoints, gray_old.shape[::-1], None,
-                                                                       None, None, None, cv2.CV_CALIB_RATIONAL_MODEL)
+                                                                       None, None, None, cv2.CALIB_RATIONAL_MODEL)
                     file = open("\camera_info.yaml", "w")
                     file.write(
                         yaml.dump({"ret": ret, "matrix": mtx, "distortion": dist, "rvecs": rvecs, "tvecs": tvecs}))
