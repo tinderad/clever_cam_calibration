@@ -4,11 +4,11 @@ import glob
 import yaml
 import urllib.request
 
-FISHEYE_CAM_320 = "fisheye_cam_320.yaml"
-FISHEYE_CAM_640 = "fisheye_cam_640.yaml"
+CLEVER_FISHEYE_CAM_320 = "fisheye_cam_320.yaml"
+CLEVER_FISHEYE_CAM_640 = "fisheye_cam_640.yaml"
 
 
-def set_camera_info(chessboard_size, square_size, images_topic, destination):
+def set_camera_info(chessboard_size, square_size, images):
     if chessboard_size is not None:
         chessboard_size = list(map(int, chessboard_size.split("x")))
         if len(chessboard_size) == 2:
@@ -28,9 +28,9 @@ def set_camera_info(chessboard_size, square_size, images_topic, destination):
     objp[:, :2] = np.mgrid[0:length, 0:width].T.reshape(-1, 2)
     objpoints = []
     imgpoints = []
-    images = glob.glob(str(images_topic) + '*.jpg')
-    if len(images) < 10:
-        print("Error: not enough images (10 required), found: ", len(images))
+    images = glob.glob(str(images) + '*.jpg')
+    if len(images) < 25:
+        print("Error: not enough images (25 required), found: ", len(images))
         quit()
     print("Starting calibration...")
     for fname in images:
@@ -45,12 +45,17 @@ def set_camera_info(chessboard_size, square_size, images_topic, destination):
         print("Error: Chessboard not found")
         quit()
 
-    ret, mtx, dist, rvecs, tvecs = cv2.calibrateCamera(objpoints, imgpoints, gray.shape[::-1], None, None)
-    np.savetxt("matrix.txt", (mtx[0][0], mtx[0][2], mtx[1][1], mtx[1][2], mtx[2][2]), fmt='%s')
-    np.savetxt("distortion.txt", dist, fmt='%s')
+    ret, mtx, dist, rvecs, tvecs = cv2.calibrateCamera(objpoints, imgpoints, gray.shape[::-1], None,
+                                                       None, None, None, cv2.CALIB_RATIONAL_MODEL)
+    matrix = []
+    for i in mtx:
+        for x in i: matrix.append(x)
+    distortion = dist[0]
+    data = {"camera_matrix": {"data": matrix}, "distortion_coefficients": {"data": distortion}}
+    file = open("camera_info.yaml", "w")
+    file.write(yaml.dump(data))
     print("Calibration successful")
-    file = open(destination + "\camera_info.yaml", "w")
-    file.write(yaml.dump({"ret": ret, "matrix": mtx, "distortion": dist, "rvecs": rvecs, "tvecs": tvecs}))
+    quit()
 
 
 def get_undistorted_image(cv2_image, camera_info):
@@ -68,7 +73,7 @@ def get_undistorted_image(cv2_image, camera_info):
     return dst
 
 
-def calibrate(chessboard_size, square_size):
+def calibrate(chessboard_size, square_size, saving_mode = False):
     print("Calibration started!")
     length, width = chessboard_size
     criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, square_size, 0.001)
@@ -77,6 +82,7 @@ def calibrate(chessboard_size, square_size):
     objpoints = []
     imgpoints = []
     gray_old = None
+    i=0
     print("For help see ...")
     print("Commands:")
     print("help, catch (key: Enter), delete, restart, stop, finish")
@@ -92,16 +98,21 @@ def calibrate(chessboard_size, square_size):
             if ret:
                 objpoints.append(objp)
                 corners2 = cv2.cornerSubPix(gray, corners, (11, 11), (-1, -1), criteria)
-                imgpoints.append(corners2)
                 gray_old = gray
+                cv2.drawChessboardCorners(gray, (length, width), corners2, ret)
+                cv2.imshow("corners",gray)
+                imgpoints.append(corners2)
+                if saving_mode:
+                    cv2.imwrite("photo"+str(i)+".jpg",gray)
+                    i+=1
                 print("Image added, now " + str(len(objpoints)))
             else:
                 print("Chessboard not found, now " + str(len(objpoints)))
         elif len(command.split()) == 1:
             if command == "help":
-                print("Take pictures of a chessboard from different racourses by using command 'catch'.")
+                print("Take pictures of a chessboard from different points of view by using command 'catch'.")
                 print(
-                    "You should take at least 10 pictures to finish calibration (adding more gives you better accuracy).")
+                    "You should take at least 25 pictures to finish calibration (adding more gives you better accuracy).")
                 print("Finish calibration by using command 'finish'.")
                 print("Corrected coefficients will be stored in present directory as 'camera_info.yaml'")
             elif command == "delete":
@@ -115,18 +126,22 @@ def calibrate(chessboard_size, square_size):
                 print("Stopped")
                 break
             elif command == "finish":
-                if len(objpoints) >= 10:
+                if len(objpoints) >= 25:
                     ret, mtx, dist, rvecs, tvecs = cv2.calibrateCamera(objpoints, imgpoints, gray_old.shape[::-1], None,
                                                                        None, None, None, cv2.CALIB_RATIONAL_MODEL)
-                    file = open("\camera_info.yaml", "w")
-                    file.write(
-                        yaml.dump({"ret": ret, "matrix": mtx, "distortion": dist, "rvecs": rvecs, "tvecs": tvecs}))
+                    matrix = []
+                    for i in mtx:
+                        for x in i: matrix.append(x)
+                    distortion = dist[0]
+                    data = {"camera_matrix": {"data":matrix}, "distortion_coefficients": {"data":distortion}}
+                    file = open("camera_info.yaml", "w")
+                    file.write(yaml.dump(data))
                     print("Calibration successful")
                     quit()
                 else:
-                    print("Not enough images, now " + str(len(objpoints)) + " (10 required)")
+                    print("Not enough images, now " + str(len(objpoints)) + " (25 required)")
             elif command == "restart":
-                calibrate()
+                calibrate(chessboard_size, square_size, saving_mode)
                 break
         elif len(command.split()) == 2 and command.split()[0] == "help":
             command = command.split()[1]
@@ -136,16 +151,15 @@ def calibrate(chessboard_size, square_size):
             elif command == "delete":
                 print("Deletes previous stored picture")
             elif command == "restart":
-                print("Restarts a calibration script with new arguments")
-                print("args: new_size new_square_size")
-                print("Without these arguments script will be restarted with present arguments")
+                print("Restarts a calibration script")
             elif command == "stop":
                 print("Stops calibration (all data will be deleted)")
             elif command == "finish":
                 print("Ends calibration:")
                 print(
-                    "If there are 10 photos or more, calibration coefficients will be saved in present directory as 'camera_info.yaml' ")
+                    "If there are 25 photos or more, calibration coefficients will be saved in present directory as 'camera_info.yaml' ")
             else:
-                print("unknown command")
+                print("Unknown command")
         else:
             print("Unknown command")
+    cv2.destroyAllWindows()
