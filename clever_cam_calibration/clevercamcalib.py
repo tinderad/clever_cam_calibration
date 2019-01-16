@@ -163,3 +163,10 @@ def calibrate(chessboard_size, square_size, saving_mode = False):
         else:
             print("Unknown command")
     cv2.destroyAllWindows()
+
+def calibrate_command():
+    ch_width = int(input("Chessboard width: "))
+    ch_height = int(input("Chessboard height: "))
+    sq_size = int(input("Square size: "))
+    s_mod = input("Saving mode (YES - on): ")
+    calibrate((ch_width,ch_height),sq_size,s_mod == "YES")
