@@ -170,3 +170,9 @@ def calibrate_command():
     sq_size = int(input("Square size: "))
     s_mod = input("Saving mode (YES - on): ")
     calibrate((ch_width,ch_height),sq_size,s_mod == "YES")
+def calibrate_ex_command():
+    ch_width = int(input("Chessboard width: "))
+    ch_height = int(input("Chessboard height: "))
+    sq_size = int(input("Square size: "))
+    path = input("path")
+    set_camera_info((ch_width,ch_height),sq_size,path)
