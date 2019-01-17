@@ -43,7 +43,7 @@ python setup.py install
 <p>Перейдите на 192.168.11.1:8080 и проверьте, получает ли компьютер изображения из топика image_raw</p>
 </blockquote>
 <h1 id="калибровка">Калибровка</h1>
-<p>Запустите скрипт <strong><em>calibrate</em></strong>:</p>
+<p>Запустите скрипт <strong><em>calibrate_cam</em></strong>:</p>
 <p><strong>Windows:</strong></p>
 <pre><code>path\to\python\Scripts\calibrate_cam.exe
 </code></pre>
