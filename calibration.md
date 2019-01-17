@@ -116,7 +116,7 @@ Path<span class="token punctuation">:</span>  <span class="token comment"># Пу
 <h1 id="пример-использования">Пример использования:</h1>
 <p><strong>Обработка потока изображений с камеры</strong>.</p>
 <p>Данная программа получает изображения с камеры и выводит их на экран в исправленном виде при существующем файле калибровки.</p>
-<pre class=" language-py"><code class="prism  language-py"><span class="token keyword">import</span> clevercamcalib<span class="token punctuation">.</span>clevercamcalib <span class="token keyword">as</span> ccc  
+<pre class=" language-py"><code class="prism  language-py"><span class="token keyword">import</span> clever_cam_calibration<span class="token punctuation">.</span>clevercamcalib <span class="token keyword">as</span> ccc  
 <span class="token keyword">import</span> cv2  
   
 camera <span class="token operator">=</span> cv2<span class="token punctuation">.</span>VideoCapture<span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">)</span>  
