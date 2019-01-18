@@ -4,8 +4,18 @@ import glob
 import yaml
 import urllib.request
 
-CLEVER_FISHEYE_CAM_320 = "fisheye_cam_320.yaml"
-CLEVER_FISHEYE_CAM_640 = "fisheye_cam_640.yaml"
+CLEVER_FISHEYE_CAM_320 = {
+    "camera_matrix": {"data": [166.23942373, 0, 162.19011247, 0, 166.5880924, 109.82227736, 0, 0, 1]},
+    "distortion_coefficients": {"data": [2.15356885e-01, -1.17472846e-01, -3.06197672e-04, -1.09444025e-04,
+                                         -4.53657258e-03, 5.73090623e-01, - 1.27574577e-01, - 2.86125589e-02,
+                                         0.00000000e+00, 0.00000000e+00, 0.00000000e+00, 0.00000000e+00, 0.00000000e+00,
+                                         0.00000000e+00]}}
+CLEVER_FISHEYE_CAM_640 = {"camera_matrix": {
+    "data": [332.47884746, 0, 324.38022494, 0, 333.17618479, 219.64455471, 0, 0, 1]},
+    "distortion_coefficients": {"data": [2.15356885e-01, - 1.17472846e-01, - 3.06197672e-04, - 1.09444025e-04,
+                                         - 4.53657258e-03, 5.73090623e-01, - 1.27574577e-01, - 2.86125589e-02,
+                                         0.00000000e+00, 0.00000000e+00, 0.00000000e+00, 0.00000000e+00,
+                                         0.00000000e+00, 0.00000000e+00]}}
 
 
 def set_camera_info(chessboard_size, square_size, images):
@@ -59,12 +69,11 @@ def set_camera_info(chessboard_size, square_size, images):
 
 
 def get_undistorted_image(cv2_image, camera_info):
-    file = yaml.load(open(camera_info))
+    if camera_info == CLEVER_FISHEYE_CAM_320 or CLEVER_FISHEYE_CAM_640: file = camera_info
+    else: file = yaml.load(open(camera_info))
     mtx = file['camera_matrix']["data"]
     matrix = np.array([[mtx[0], mtx[1], mtx[2]], [mtx[3], mtx[4], mtx[5]], [mtx[6], mtx[7], mtx[8]]])
-    print(matrix)
     distortions = np.array(file['distortion_coefficients']["data"])
-    print(distortions)
     h, w = cv2_image.shape[:2]
     newcameramtx, roi = cv2.getOptimalNewCameraMatrix(matrix, distortions, (w, h), 1, (w, h))
     dst = cv2.undistort(cv2_image, matrix, distortions, None, newcameramtx)
@@ -83,7 +92,6 @@ def calibrate(chessboard_size, square_size, saving_mode=False):
     imgpoints = []
     gray_old = None
     i = 0
-    print("For help see ...")
     print("Commands:")
     print("help, catch (key: Enter), delete, restart, stop, finish")
     while True:
