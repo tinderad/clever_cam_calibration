@@ -69,7 +69,7 @@ def set_camera_info(chessboard_size, square_size, images):
 
 
 def get_undistorted_image(cv2_image, camera_info):
-    if camera_info == CLEVER_FISHEYE_CAM_320 or CLEVER_FISHEYE_CAM_640: file = camera_info
+    if camera_info == CLEVER_FISHEYE_CAM_320 or camera_info == CLEVER_FISHEYE_CAM_640: file = camera_info
     else: file = yaml.load(open(camera_info))
     mtx = file['camera_matrix']["data"]
     matrix = np.array([[mtx[0], mtx[1], mtx[2]], [mtx[3], mtx[4], mtx[5]], [mtx[6], mtx[7], mtx[8]]])
