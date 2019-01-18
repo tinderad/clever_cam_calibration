@@ -79,7 +79,10 @@ def get_undistorted_image(cv2_image, camera_info):
     dst = cv2.undistort(cv2_image, matrix, distortions, None, newcameramtx)
     x, y, w, h = roi
     dst = dst[y:y + h, x:x + w]
-    return dst
+    height_or,width_or,depth_or = cv2_image.shape
+    height_un, width_un, depth_un = dst.shape
+    frame = cv2.resize(dst,(0,0),fx=(width_or/width_un),fy=(height_or/height_un))
+    return frame
 
 
 def calibrate(chessboard_size, square_size, saving_mode=False):
