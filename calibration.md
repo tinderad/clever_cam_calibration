@@ -120,8 +120,7 @@ Path:  <span class="token comment"># Путь до папки с изображ�
   
 camera <span class="token operator">=</span> cv2<span class="token punctuation">.</span>VideoCapture<span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">)</span>  
 <span class="token keyword">while</span> <span class="token boolean">True</span><span class="token punctuation">:</span>  
-    return_value<span class="token punctuation">,</span> image <span class="token operator">=</span> camera<span class="token punctuation">.</span>read<span class="token punctuation">(</span><span class="token punctuation">)</span>  
-    gray <span class="token operator">=</span> cv2<span class="token punctuation">.</span>cvtColor<span class="token punctuation">(</span>image<span class="token punctuation">,</span> cv2<span class="token punctuation">.</span>COLOR_BGR2GRAY<span class="token punctuation">)</span>  
+    return_value<span class="token punctuation">,</span> image <span class="token operator">=</span> camera<span class="token punctuation">.</span>read<span class="token punctuation">(</span><span class="token punctuation">)</span>    
     undistorted_img <span class="token operator">=</span> ccc<span class="token punctuation">.</span>get_undistorted_image<span class="token punctuation">(</span>gray<span class="token punctuation">,</span> <span class="token string">"camera_info.yaml"</span><span class="token punctuation">)</span>  
     cv2<span class="token punctuation">.</span>imshow<span class="token punctuation">(</span><span class="token string">"undistort"</span><span class="token punctuation">,</span> undistorted_img<span class="token punctuation">)</span>  
     cv2<span class="token punctuation">.</span>waitKey<span class="token punctuation">(</span><span class="token number">33</span><span class="token punctuation">)</span>  
