@@ -20,10 +20,8 @@ CLEVER_FISHEYE_CAM_640 = {"camera_matrix": {
 
 def set_camera_info(chessboard_size, square_size, images):
     if chessboard_size is not None:
-        chessboard_size = list(map(int, chessboard_size.split("x")))
         if len(chessboard_size) == 2:
-            length = chessboard_size[0]
-            width = chessboard_size[1]
+            length, width = chessboard_size
         else:
             print("Incorrect chessboard_size")
             quit()
@@ -57,20 +55,16 @@ def set_camera_info(chessboard_size, square_size, images):
 
     ret, mtx, dist, rvecs, tvecs = cv2.calibrateCamera(objpoints, imgpoints, gray.shape[::-1], None,
                                                        None, None, None, cv2.CALIB_RATIONAL_MODEL)
-    matrix = []
-    for i in mtx:
-        for x in i: matrix.append(x)
-    distortion = dist[0]
-    data = {"camera_matrix": {"data": matrix}, "distortion_coefficients": {"data": distortion}}
-    file = open("camera_info.yaml", "w")
-    file.write(yaml.dump(data))
+    __yaml_dump(mtx, dist, rvecs, tvecs, gray.shape)
     print("Calibration successful")
     quit()
 
 
 def get_undistorted_image(cv2_image, camera_info):
-    if camera_info == CLEVER_FISHEYE_CAM_320 or camera_info == CLEVER_FISHEYE_CAM_640: file = camera_info
-    else: file = yaml.load(open(camera_info))
+    if camera_info == CLEVER_FISHEYE_CAM_320 or camera_info == CLEVER_FISHEYE_CAM_640:
+        file = camera_info
+    else:
+        file = yaml.load(open(camera_info))
     mtx = file['camera_matrix']["data"]
     matrix = np.array([[mtx[0], mtx[1], mtx[2]], [mtx[3], mtx[4], mtx[5]], [mtx[6], mtx[7], mtx[8]]])
     distortions = np.array(file['distortion_coefficients']["data"])
@@ -79,9 +73,9 @@ def get_undistorted_image(cv2_image, camera_info):
     dst = cv2.undistort(cv2_image, matrix, distortions, None, newcameramtx)
     x, y, w, h = roi
     dst = dst[y:y + h, x:x + w]
-    height_or,width_or,depth_or = cv2_image.shape
+    height_or, width_or, depth_or = cv2_image.shape
     height_un, width_un, depth_un = dst.shape
-    frame = cv2.resize(dst,(0,0),fx=(width_or/width_un),fy=(height_or/height_un))
+    frame = cv2.resize(dst, (0, 0), fx=(width_or / width_un), fy=(height_or / height_un))
     return frame
 
 
@@ -110,8 +104,6 @@ def calibrate(chessboard_size, square_size, saving_mode=False):
                 objpoints.append(objp)
                 corners2 = cv2.cornerSubPix(gray, corners, (11, 11), (-1, -1), criteria)
                 gray_old = gray
-                cv2.drawChessboardCorners(gray, (length, width), corners2, ret)
-                cv2.imshow("corners", gray)
                 imgpoints.append(corners2)
                 if saving_mode:
                     cv2.imwrite("photo" + str(i) + ".jpg", gray)
@@ -140,13 +132,7 @@ def calibrate(chessboard_size, square_size, saving_mode=False):
                 if len(objpoints) >= 25:
                     ret, mtx, dist, rvecs, tvecs = cv2.calibrateCamera(objpoints, imgpoints, gray_old.shape[::-1], None,
                                                                        None, None, None, cv2.CALIB_RATIONAL_MODEL)
-                    matrix = []
-                    for i in mtx:
-                        for x in i: matrix.append(x)
-                    distortion = dist[0]
-                    data = {"camera_matrix": {"data": matrix}, "distortion_coefficients": {"data": distortion}}
-                    file = open("camera_info.yaml", "w")
-                    file.write(yaml.dump(data))
+                    __yaml_dump(mtx, dist, rvecs, tvecs, gray_old.shape)
                     print("Calibration successful")
                     quit()
                 else:
@@ -176,6 +162,37 @@ def calibrate(chessboard_size, square_size, saving_mode=False):
     cv2.destroyAllWindows()
 
 
+def __yaml_dump(mtx, dist, rvecs, tvecs, resolution):
+    h, w, = resolution
+    pmatrix = __compute_proj_mat(mtx, rvecs, tvecs)
+    rm_data = [1, 0, 0, 0, 1, 0, 0, 0, 1]
+
+    mat_data = []
+    for i in mtx:
+        for x in i: mat_data.append(x)
+    mat_data = list(map(float, mat_data))
+
+    dst_data = list(map(float, dist[0]))
+
+    pm_data = []
+    for i in pmatrix:
+        for x in i: pm_data.append(x)
+    pm_data = list(map(float, pm_data))
+
+    data = {"image_width": w,
+            "image_height": h,
+            "distortion_model": "plumb_bob",
+            "camera_name": "raspicam",
+            "camera_matrix": {"rows": 3, "cols": 3, "data": mat_data},
+            "distortion_coefficients": {"data": dst_data},
+            "rectification_matrix": {"rows": 3, "cols": 3, "data": rm_data},
+            "projection_matrix": {"rows": 3, "cols": 4, "data": pm_data}}
+    file = open("camera_info.yaml", "w")
+    for key in data:
+        if type(key)==dict:
+            for key2 in key: file.write(yaml.dump({key2:key[key2]}))
+        else: file.write(yaml.dump({key:data[key]}, default_flow_style=False))
+
 def calibrate_command():
     ch_width = int(input("Chessboard width: "))
     ch_height = int(input("Chessboard height: "))
@@ -192,3 +209,13 @@ def calibrate_ex_command():
     path = input("path")
     print("---")
     set_camera_info((ch_width, ch_height), sq_size, path)
+
+
+def __compute_proj_mat(mtx, rvecs, tvecs):
+    cam_mtx = np.zeros((3, 4), np.float64)
+    cam_mtx[:, :-1] = mtx
+    rmat = np.zeros((3, 3), np.float64)
+    r_t_mat = np.zeros((3, 4), np.float64)
+    cv2.Rodrigues(rvecs[0], rmat)
+    r_t_mat = cv2.hconcat([rmat, tvecs[0]], r_t_mat)
+    return (cam_mtx * r_t_mat)
