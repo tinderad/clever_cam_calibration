@@ -4,8 +4,8 @@ from os.path import join, dirname
 setup(
     name='clever_cam_calibration',
     version='1.0',
-    packages=find_packages(),
+    packages= ['clever_cam_calibration'],
     long_description=open(join(dirname(__file__), 'README.txt')).read(),
-    entry_points={'console_scripts':['calibrate = clever_cam_calibration.clevercamcalib:calibrate_command',
-                                     'calibrate_ex = clever_cam_calibration.clevercamcalib:calibrate_ex_command']}
+    entry_points={'console_scripts':['calibrate_cam = clever_cam_calibration.clevercamcalib:calibrate_command',
+                                     'calibrate_cam_ex = clever_cam_calibration.clevercamcalib:calibrate_ex_command']}
 )

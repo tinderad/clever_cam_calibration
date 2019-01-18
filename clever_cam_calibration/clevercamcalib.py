@@ -73,7 +73,7 @@ def get_undistorted_image(cv2_image, camera_info):
     return dst
 
 
-def calibrate(chessboard_size, square_size, saving_mode = False):
+def calibrate(chessboard_size, square_size, saving_mode=False):
     print("Calibration started!")
     length, width = chessboard_size
     criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, square_size, 0.001)
@@ -82,7 +82,7 @@ def calibrate(chessboard_size, square_size, saving_mode = False):
     objpoints = []
     imgpoints = []
     gray_old = None
-    i=0
+    i = 0
     print("For help see ...")
     print("Commands:")
     print("help, catch (key: Enter), delete, restart, stop, finish")
@@ -100,11 +100,11 @@ def calibrate(chessboard_size, square_size, saving_mode = False):
                 corners2 = cv2.cornerSubPix(gray, corners, (11, 11), (-1, -1), criteria)
                 gray_old = gray
                 cv2.drawChessboardCorners(gray, (length, width), corners2, ret)
-                cv2.imshow("corners",gray)
+                cv2.imshow("corners", gray)
                 imgpoints.append(corners2)
                 if saving_mode:
-                    cv2.imwrite("photo"+str(i)+".jpg",gray)
-                    i+=1
+                    cv2.imwrite("photo" + str(i) + ".jpg", gray)
+                    i += 1
                 print("Image added, now " + str(len(objpoints)))
             else:
                 print("Chessboard not found, now " + str(len(objpoints)))
@@ -133,7 +133,7 @@ def calibrate(chessboard_size, square_size, saving_mode = False):
                     for i in mtx:
                         for x in i: matrix.append(x)
                     distortion = dist[0]
-                    data = {"camera_matrix": {"data":matrix}, "distortion_coefficients": {"data":distortion}}
+                    data = {"camera_matrix": {"data": matrix}, "distortion_coefficients": {"data": distortion}}
                     file = open("camera_info.yaml", "w")
                     file.write(yaml.dump(data))
                     print("Calibration successful")
@@ -164,15 +164,20 @@ def calibrate(chessboard_size, square_size, saving_mode = False):
             print("Unknown command")
     cv2.destroyAllWindows()
 
+
 def calibrate_command():
     ch_width = int(input("Chessboard width: "))
     ch_height = int(input("Chessboard height: "))
     sq_size = int(input("Square size: "))
     s_mod = input("Saving mode (YES - on): ")
-    calibrate((ch_width,ch_height),sq_size,s_mod == "YES")
+    print("---")
+    calibrate((ch_width, ch_height), sq_size, s_mod == "YES")
+
+
 def calibrate_ex_command():
     ch_width = int(input("Chessboard width: "))
     ch_height = int(input("Chessboard height: "))
     sq_size = int(input("Square size: "))
     path = input("path")
-    set_camera_info((ch_width,ch_height),sq_size,path)
+    print("---")
+    set_camera_info((ch_width, ch_height), sq_size, path)
