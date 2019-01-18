@@ -4,8 +4,8 @@ import glob
 import yaml
 import urllib.request
 
-CLEVER_FISHEYE_CAM_320 = "fisheye_cam_320.yaml"
-CLEVER_FISHEYE_CAM_640 = "fisheye_cam_640.yaml"
+CLEVER_FISHEYE_CAM_320 = "clever_cam_calibration\fisheye_cam_320.yaml"
+CLEVER_FISHEYE_CAM_640 = "clever_cam_calibration\fisheye_cam_640.yaml"
 
 
 def set_camera_info(chessboard_size, square_size, images):
@@ -62,9 +62,7 @@ def get_undistorted_image(cv2_image, camera_info):
     file = yaml.load(open(camera_info))
     mtx = file['camera_matrix']["data"]
     matrix = np.array([[mtx[0], mtx[1], mtx[2]], [mtx[3], mtx[4], mtx[5]], [mtx[6], mtx[7], mtx[8]]])
-    print(matrix)
     distortions = np.array(file['distortion_coefficients']["data"])
-    print(distortions)
     h, w = cv2_image.shape[:2]
     newcameramtx, roi = cv2.getOptimalNewCameraMatrix(matrix, distortions, (w, h), 1, (w, h))
     dst = cv2.undistort(cv2_image, matrix, distortions, None, newcameramtx)
@@ -83,7 +81,6 @@ def calibrate(chessboard_size, square_size, saving_mode=False):
     imgpoints = []
     gray_old = None
     i = 0
-    print("For help see ...")
     print("Commands:")
     print("help, catch (key: Enter), delete, restart, stop, finish")
     while True:
