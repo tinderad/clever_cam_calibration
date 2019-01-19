@@ -127,16 +127,17 @@ Path:  <span class="token comment"># Путь до папки с изображ�
 <h1 id="пример-использования">Пример использования:</h1>
 <p><strong>Обработка потока изображений с камеры</strong>.</p>
 <p>Данная программа получает изображения с камеры и выводит их на экран в исправленном виде при существующем файле калибровки.</p>
-<pre class="  language-py"><code class="prism  language-py"><span class="token keyword">import</span> clever_cam_calibration<span class="token punctuation">.</span>clevercamcalib <span class="token keyword">as</span> ccc  
-<span class="token keyword">import</span> cv2  
-<p>camera <span class="token operator">=</span> cv2<span class="token punctuation">.</span>VideoCapture<span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">)</span><br>
-<span class="token keyword">while</span> <span class="token boolean">True</span><span class="token punctuation">:</span><br>
-return_value<span class="token punctuation">,</span> image <span class="token operator">=</span> camera<span class="token punctuation">.</span>read<span class="token punctuation">(</span><span class="token punctuation">)</span><br>
-undistorted_img <span class="token operator">=</span> ccc<span class="token punctuation">.</span>get_undistorted_image<span class="token punctuation">(</span>gray<span class="token punctuation">,</span> <span class="token string">“camera_info.yaml”</span><span class="token punctuation">)</span><br>
-cv2<span class="token punctuation">.</span>imshow<span class="token punctuation">(</span><span class="token string">“undistort”</span><span class="token punctuation">,</span> undistorted_img<span class="token punctuation">)</span><br>
-cv2<span class="token punctuation">.</span>waitKey<span class="token punctuation">(</span><span class="token number">33</span><span class="token punctuation">)</span><br>
-cv2<span class="token punctuation">.</span>destroyAllWindows<span class="token punctuation">(</span><span class="token punctuation">)</span></code></pre><br>
+<pre><code>import clevercamcalib.clevercamcalib as ccc  
+import cv2  
+import urllib.request  
+import numpy as np  
+while True:  
+    req = urllib.request.urlopen('http://192.168.11.1:8080/snapshot?topic=/main_camera/image_raw')  
+    arr = np.asarray(bytearray(req.read()), dtype=np.uint8)  
+    image = cv2.imdecode(arr, -1)  
+    undistorted_img = ccc.get_undistorted_image(image, ccc.CLEVER_FISHEYE_CAM_640)  
+    cv2.imshow("undistort", undistorted_img)  
+    cv2.waitKey(33)  
+cv2.destroyAllWindows()
+</code></pre><br>
 </p>
-<!--stackedit_data:
-eyJoaXN0b3J5IjpbMjk3ODA5OTI0XX0=
--->
