@@ -131,3 +131,6 @@ cv2<span class="token punctuation">.</span>destroyAllWindows<span class="token p
 <p>Written with <a href="https://stackedit.io/">StackEdit</a>.</p>
 </blockquote>
 
+<!--stackedit_data:
+eyJoaXN0b3J5IjpbLTEyNTcxNzI2NzVdfQ==
+-->
