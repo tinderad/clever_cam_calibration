@@ -1,18 +1,9 @@
----
 
-
----
-
-<hr>
-<hr>
-<hr>
-<hr>
-<hr>
-<hr>
 <h1 id="калибровка-камеры">Калибровка камеры</h1>
 <h1 id="введение">Введение</h1>
 <p>Компьютерное зрение получает все более широкое распространение. Зачастую, алгоритмы компьютерного зрения работают неточно, получая искаженное изображение с камеры, что особенно характерно для fisheye-камер.<br>
-![asd](https://github.com/tinderad/clever_cam_calibration/blob/master/assets/img1.jpg?raw=true)
+<p><img src="https://github.com/tinderad/clever_cam_calibration/blob/master/assets/img1.jpg?raw=true" alt="asd"></p>
+<blockquote>
 <br>
 Какой-либо алгоритм компьютерного зрения будет воспринимать информацию с этой картинки неправильно. Для устранения подобных искажений камера, получающая изображения, должна быть откалибрована в соответствии со своими особенностями.</p>
 <h1 id="установка-скрипта">Установка скрипта</h1>
@@ -137,5 +128,5 @@ cv2<span class="token punctuation">.</span>destroyAllWindows<span class="token p
 </blockquote>
 
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbLTE3MDYzNzkwOTldfQ==
+eyJoaXN0b3J5IjpbMTc5MjAxMjNdfQ==
 -->
