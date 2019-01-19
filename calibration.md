@@ -11,6 +11,10 @@
 <p>Изображение "скруглено" ближе к краям</p>
 </blockquote>
 Какой-либо алгоритм компьютерного зрения будет воспринимать информацию с этой картинки неправильно. Для устранения подобных искажений камера, получающая изображения, должна быть откалибрована в соответствии со своими особенностями.
+</p><p><img src="https://github.com/tinderad/clever_cam_calibration/blob/master/assets/calibresult.jpg?raw=true" alt="asd"></p>
+<blockquote>
+<p>Исправленное изображение</p>
+</blockquote>
 <h1 id="установка-скрипта">Установка скрипта</h1>
 <p>Для начала, необходимо установить необходимые библиотеки:</p>
 <pre class="  language-python"><code class="prism  language-python">pip install numpy  
