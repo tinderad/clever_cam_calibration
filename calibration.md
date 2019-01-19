@@ -137,3 +137,6 @@ cv2<span class="token punctuation">.</span>imshow<span class="token punctuation"
 cv2<span class="token punctuation">.</span>waitKey<span class="token punctuation">(</span><span class="token number">33</span><span class="token punctuation">)</span><br>
 cv2<span class="token punctuation">.</span>destroyAllWindows<span class="token punctuation">(</span><span class="token punctuation">)</span></code></pre><br>
 </p>
+<!--stackedit_data:
+eyJoaXN0b3J5IjpbMjk3ODA5OTI0XX0=
+-->
