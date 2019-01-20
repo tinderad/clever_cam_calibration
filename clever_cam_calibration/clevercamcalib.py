@@ -166,7 +166,6 @@ def __yaml_dump(mtx, dist, rvecs, tvecs, resolution):
     h, w, = resolution
     pmatrix = __compute_proj_mat(mtx, rvecs, tvecs)
     rm_data = [1, 0, 0, 0, 1, 0, 0, 0, 1]
-
     mat_data = []
     for i in mtx:
         for x in i: mat_data.append(x)
@@ -184,14 +183,16 @@ def __yaml_dump(mtx, dist, rvecs, tvecs, resolution):
             "distortion_model": "plumb_bob",
             "camera_name": "raspicam",
             "camera_matrix": {"rows": 3, "cols": 3, "data": mat_data},
-            "distortion_coefficients": {"data": dst_data},
+            "distortion_coefficients": {"rows": 1, "cols": 8, "data": dst_data},
             "rectification_matrix": {"rows": 3, "cols": 3, "data": rm_data},
             "projection_matrix": {"rows": 3, "cols": 4, "data": pm_data}}
     file = open("camera_info.yaml", "w")
     for key in data:
-        if type(key)==dict:
-            for key2 in key: file.write(yaml.dump({key2:key[key2]}))
-        else: file.write(yaml.dump({key:data[key]}, default_flow_style=False))
+        if type(key) == dict:
+            for key2 in key: file.write(yaml.dump({key2: key[key2]}))
+        else:
+            file.write(yaml.dump({key: data[key]}, default_flow_style=False))
+
 
 def calibrate_command():
     ch_width = int(input("Chessboard width: "))
