@@ -207,7 +207,7 @@ def calibrate_ex_command():
     ch_width = int(input("Chessboard width: "))
     ch_height = int(input("Chessboard height: "))
     sq_size = int(input("Square size: "))
-    path = input("path")
+    path = input("Path: ")
     print("---")
     set_camera_info((ch_width, ch_height), sq_size, path)
 
